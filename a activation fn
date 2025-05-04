@@ -31,3 +31,129 @@ plt.plot(x, relu)
 plt.title('ReLU')
 plt.tight_layout()
 plt.show()
+
+
+1. What is an Activation Function?
+An activation function determines whether a neuron should be activated or not, introducing non-linearity into the model.
+Without it, a neural network would just be a linear regression model regardless of how many layers it has.
+Why we need it:
+To model complex, non-linear patterns.
+Helps with learning and backpropagation.
+
+Activation functions are key components in neural networks. They determine whether a neuron should be activated or not by transforming the weighted sum of inputs into the output of the neuron. Here's a detailed explanation of the most common activation functions:
+
+---
+
+### 1. **Sigmoid Function**
+
+**Formula:**
+
+$$
+\sigma(x) = \frac{1}{1 + e^{-x}}
+$$
+
+**Range:** (0, 1)
+
+**Use Case:** Binary classification (especially at the output layer)
+
+**Pros:**
+
+* Smooth gradient
+* Output is always between 0 and 1
+
+**Cons:**
+
+* Causes vanishing gradient problem
+* Output not zero-centered
+* Slow convergence in deep networks
+
+---
+
+### 2. **Tanh (Hyperbolic Tangent) Function**
+
+**Formula:**
+
+$$
+\tanh(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}
+$$
+
+**Range:** (-1, 1)
+
+**Use Case:** Hidden layers where zero-centered data is beneficial
+
+**Pros:**
+
+* Zero-centered (better for gradient updates)
+* Steeper than sigmoid
+
+**Cons:**
+
+* Still suffers from vanishing gradient problem for large inputs
+
+---
+
+### 3. **ReLU (Rectified Linear Unit)**
+
+**Formula:**
+
+$$
+f(x) = \max(0, x)
+$$
+
+**Range:** \[0, ∞)
+
+**Use Case:** Most commonly used in hidden layers of deep neural networks
+
+**Pros:**
+
+* Computationally efficient
+* Helps solve vanishing gradient problem
+* Faster convergence
+
+**Cons:**
+
+* Dying ReLU problem (neurons can get stuck and always output 0)
+
+---
+
+### 4. **Leaky ReLU**
+
+**Formula:**
+
+$$
+f(x) = 
+\begin{cases}
+x & \text{if } x > 0 \\
+\alpha x & \text{if } x \leq 0
+\end{cases}
+where α is a small constant like 0.01
+**Use Case:** Avoids dying ReLU problem
+**Pros:**
+* Allows a small gradient when x < 0
+* Better than ReLU in some deep networks
+**Cons:**
+* Introduces a small slope manually; still heuristic-based
+
+
+
+### 5. **Softmax Function**
+**Formula:**
+\sigma(z_i) = \frac{e^{z_i}}{\sum_{j=1}^{n} e^{z_j}}
+
+**Range:** (0, 1), and all outputs sum to 1
+**Use Case:** Multi-class classification (usually in output layer)
+**Pros:**
+* Outputs probabilities for each class
+* Well-suited for multi-class problems
+**Cons:**
+* Sensitive to large input values
+* Can be computationally expensive
+
+| Activation | Range   | Use Case                   | Pros                      | Cons                      |
+| ---------- | ------- | -------------------------- | ------------------------- | ------------------------- |
+| Sigmoid    | (0, 1)  | Binary classification      | Smooth, easy to interpret | Vanishing gradient        |
+| Tanh       | (-1, 1) | Hidden layers              | Zero-centered             | Still vanishing gradients |
+| ReLU       | \[0, ∞) | Hidden layers              | Fast, simple, efficient   | Dying ReLU                |
+| Leaky ReLU | (-∞, ∞) | Deep networks              | Avoids dying neurons      | α needs tuning            |
+| Softmax    | (0, 1)  | Output layer (multi-class) | Outputs probabilities     | Sensitive to large values |
+
