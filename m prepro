@@ -1,0 +1,56 @@
+# pre processing titanic
+Basic Python package!!!!!
+import pandas as pd
+import numpy as np
+
+
+df = pd.read_csv(titanic.csv, encoding='latin1')
+
+
+df.duplicated().sum()
+
+df.drop(columns=['Cabin'],axis=1,inplace=True)
+
+df.drop(columns=['PassengerId','Name', 'Ticket'],axis=1,inplace=True)
+df.sample(5)
+
+df.describe()
+
+df['Family']=df['SibSp']+df['Parch']+1
+df.head()
+
+df['Age'].fillna(df['Age'].median(), inplace=True)
+df['Embarked'].fillna(df['Embarked'].mode()[0], inplace=True)
+
+df['Sex'] = df['Sex'].map({'male': 0, 'female': 1})
+
+df.head()
+
+df.shape
+
+from sklearn.preprocessing import StandardScaler
+
+# Standardize the 'Age' and 'Fare' columns
+scaler = StandardScaler()
+df[['Age', 'Fare']] = scaler.fit_transform(df[['Age', 'Fare']])
+
+# Correlation Matrix
+corm = df.corr(numeric_only=True)
+print('Correlation Matrix:')
+print(corm['Survived'].sort_values(ascending=False))
+
+print('\n')
+
+# Feature Selection using Random Forest
+from sklearn.ensemble import RandomForestClassifier
+
+# Define the model
+model = RandomForestClassifier()
+x = df.drop('Survived', axis=1)
+y = df['Survived']
+model.fit(x , y)
+
+# Get feature importances
+feature_importances = pd.Series(model.feature_importances_, index=X.columns)
+print('Feature Importances:')
+print(feature_importances.sort_values(ascending=False))
