@@ -1,90 +1,75 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def sigmoid(z):
-    return 1 / (1 + np.exp(-z))
+# Sigmoid activation and derivative
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
 
-def initialize_parameters(input_size, hidden_size, output_size):
-    np.random.seed(42)  # For reproducibility
-    W1 = np.random.randn(hidden_size, input_size)
-    b1 = np.zeros((hidden_size, 1))
-    W2 = np.random.randn(output_size, hidden_size)
-    b2 = np.zeros((output_size, 1))
-    return W1, b1, W2, b2
+def sigmoid_derivative(output):
+    return output * (1 - output)
 
-def forward_propagation(X, W1, b1, W2, b2):
-    Z1 = np.dot(W1, X) + b1
-    A1 = sigmoid(Z1)
-    Z2 = np.dot(W2, A1) + b2
-    A2 = sigmoid(Z2)
-    return Z1, A1, Z2, A2
+# XOR Dataset
+X = np.array([[0, 0],
+              [0, 1],
+              [1, 0],
+              [1, 1]])
+y = np.array([[0], [1], [1], [0]])
 
-def compute_loss(Y, A2):
-    m = Y.shape[1]
-    loss = -np.sum(Y * np.log(A2) + (1 - Y) * np.log(1 - A2)) / m
-    return loss
-
-def backward_propagation(X, Y, Z1, A1, A2, W2):
-    m = Y.shape[1]
-    dZ2 = A2 - Y
-    dW2 = np.dot(dZ2, A1.T) / m
-    db2 = np.sum(dZ2, axis=1, keepdims=True) / m
-    dZ1 = np.dot(W2.T, dZ2) * (A1 * (1 - A1))
-    dW1 = np.dot(dZ1, X.T) / m
-    db1 = np.sum(dZ1, axis=1, keepdims=True) / m
-    return dW1, db1, dW2, db2
-
-def update_parameters(W1, b1, W2, b2, dW1, db1, dW2, db2, learning_rate):
-    W1 -= learning_rate * dW1
-    b1 -= learning_rate * db1
-    W2 -= learning_rate * dW2
-    b2 -= learning_rate * db2
-    return W1, b1, W2, b2
-
-def train(X, Y, hidden_size, output_size, learning_rate, num_epochs):
-    input_size = X.shape[0]
-    W1, b1, W2, b2 = initialize_parameters(input_size, hidden_size, output_size)
-    losses = []
-    
-    for epoch in range(num_epochs):
-        Z1, A1, Z2, A2 = forward_propagation(X, W1, b1, W2, b2)
-        loss = compute_loss(Y, A2)
-        losses.append(loss)
-        dW1, db1, dW2, db2 = backward_propagation(X, Y, Z1, A1, A2, W2)
-        W1, b1, W2, b2 = update_parameters(W1, b1, W2, b2, dW1, db1, dW2, db2, learning_rate)
-        
-        if epoch % 1000 == 0:
-            print(f"Epoch {epoch}, Loss: {loss:.5f}")
-    
-    # Plot loss graph
-    plt.plot(losses)
-    plt.xlabel("Epochs")
-    plt.ylabel("Loss")
-    plt.title("Training Loss Curve")
-    plt.show()
-    
-    return W1, b1, W2, b2
-
-def predict(X, W1, b1, W2, b2):
-    _, _, _, A2 = forward_propagation(X, W1, b1, W2, b2)
-    return np.round(A2)
-
-# XOR dataset
-X = np.array([[0, 0, 1, 1], [0, 1, 0, 1]])
-Y = np.array([[0, 1, 1, 0]])
-
-# Hyperparameters
+# Initialize hyperparameters
+np.random.seed(1)
+input_size = 2
 hidden_size = 2
 output_size = 1
 learning_rate = 0.1
-num_epochs = 10000
+epochs = 10000
 
-# Train model
-W1, b1, W2, b2 = train(X, Y, hidden_size, output_size, learning_rate, num_epochs)
+# Initialize weights and biases
+weights_input_hidden = np.random.rand(input_size, hidden_size)
+weights_hidden_output = np.random.rand(hidden_size, output_size)
+bias_hidden = np.zeros((1, hidden_size))
+bias_output = np.zeros((1, output_size))
 
-# Make predictions
-predictions = predict(X, W1, b1, W2, b2)
-print("Predictions:", predictions)
+# Store losses for plotting
+losses = []
+
+# Training loop
+for epoch in range(epochs):
+    # === Forward Propagation ===
+    hidden_input = np.dot(X, weights_input_hidden) + bias_hidden
+    hidden_output = sigmoid(hidden_input)
+
+    final_input = np.dot(hidden_output, weights_hidden_output) + bias_output
+    predicted_output = sigmoid(final_input)
+
+    # === Error and Loss ===
+    error = y - predicted_output
+    loss = np.mean(np.square(error))  # Mean Squared Error
+    losses.append(loss)
+
+    # === Backpropagation ===
+    d_output = error * sigmoid_derivative(predicted_output)
+    d_hidden = d_output.dot(weights_hidden_output.T) * sigmoid_derivative(hidden_output)
+
+    # === Weight and Bias Updates ===
+    weights_hidden_output += hidden_output.T.dot(d_output) * learning_rate
+    weights_input_hidden += X.T.dot(d_hidden) * learning_rate
+    bias_output += np.sum(d_output, axis=0, keepdims=True) * learning_rate
+    bias_hidden += np.sum(d_hidden, axis=0, keepdims=True) * learning_rate
+
+    if epoch % 1000 == 0:
+        print(f"Epoch {epoch}, Loss: {loss:.5f}")
+
+# Final prediction
+print("\nFinal predictions after training:")
+print(np.round(predicted_output))
+
+# === Plotting Loss Curve ===
+plt.plot(losses)
+plt.title("Training Loss Curve")
+plt.xlabel("Epoch")
+plt.ylabel("Loss (MSE)")
+plt.grid(True)
+plt.show()
 
 
 '''
